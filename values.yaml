@@ -1,5 +1,20 @@
 kube-prometheus-stack:
   grafana:
+    sidecar:
+      enabled: true
+      defaultDatasourceEnabled: true
+      name: Prometheus
+      uid: prometheus
+
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+        datasources:
+          - name: TestData
+            type: testdata
+            access: proxy
+            orgId: 1
+
     grafana.ini:
       auth.basic:
         enabled: false
