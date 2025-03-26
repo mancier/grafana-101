@@ -1,0 +1,40 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tns-app-deployment
+  labels:
+    app: tns-app
+spec:
+  replicas: 1 # Por padrão, execute uma réplica do pod
+  selector:
+    matchLabels:
+      app: tns-app
+  template:
+    metadata:
+      labels:
+        app: tns-app
+    spec:
+      containers:
+        - name: tns-app
+          image: grafana/tns-app
+          ports:
+            - containerPort: 80 # Porta do contêiner
+          volumeMounts:
+            - name: app-data
+              mountPath: /var/log
+      volumes:
+        - name: app-data
+          emptyDir: {} # Use um emptyDir para simular o volume (para teste)
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tns-app-service
+spec:
+  selector:
+    app: tns-app
+  ports:
+    - port: 8081 # Porta do serviço
+      targetPort: 80 # Porta do contêiner
+  type: ClusterIP # Exponha o serviço internamente no cluster

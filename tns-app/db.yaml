@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tns-db-statefulset
+  labels:
+    app: tns-db
+spec:
+  selector:
+    matchLabels:
+      app: tns-db
+  serviceName: "tns-db-service" # Service Headless para identidades de rede estáveis
+  replicas: 1 # Por padrão, execute uma réplica do pod
+  template:
+    metadata:
+      labels:
+        app: tns-db
+    spec:
+      containers:
+        - name: tns-db
+          image: grafana/tns-db:latest
+          ports:
+            - containerPort: 80 # Porta do contêiner
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/postgresql/data # Ajuste o caminho se necessário
+  volumeClaimTemplates:
+    - metadata:
+        name: db-data
+      spec:
+        accessModes: ["ReadWriteOnce"] # Como o volume será acessado
+        resources:
+          requests:
+            storage: 1Gi # Solicite 1GiB de armazenamento (ajuste conforme necessário)
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db # Service Headless
+spec:
+  selector:
+    app: tns-db
+  ports:
+    - port: 8082 # Porta do serviço
+      targetPort: 80 # Porta do contêiner
+  clusterIP: None # Torna este um Service Headless
