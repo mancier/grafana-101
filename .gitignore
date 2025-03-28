@@ -1,1 +1,25 @@
+# Logs
+logs/
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE and editor directories
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+
+# MacOS-specific files
+*.DS_Store
+
+# Windows-specific files
+Thumbs.db
+ehthumbs.db
 charts/
+monitoring-k8s-apps/
