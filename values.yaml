@@ -5,15 +5,36 @@ kube-prometheus-stack:
       defaultDatasourceEnabled: true
       name: Prometheus
       uid: prometheus
+      resources:
+        limits:
+          memory: 200Mi
+        requests:
+          cpu: 5m
+          memory: 64Mi
 
-    datasources:
-      datasources.yaml:
-        apiVersion: 1
-        datasources:
-          - name: TestData
-            type: testdata
-            access: proxy
-            orgId: 1
+    alerting:
+      contactpoints.yaml:
+        secret:
+          apiVersion: 1
+          contactPoints:
+            - orgId: 1
+              name: echo-server-webhook
+              receivers:
+                - uid: echo-server-uid
+                  type: webhook
+                  settings:
+                    url: http://echo-server.echo-server.svc.cluster.local/
+                    httpMethod: POST
+                    maxAlerts: 0
+                  disableResolveMessage: false
+
+    additionalDataSources:
+      - name: tns-apps
+        access: proxy
+        basicAuth: false
+        type: prometheus
+        orgId: 1
+        url: http://app:80
 
     grafana.ini:
       auth.basic:
@@ -26,3 +47,30 @@ kube-prometheus-stack:
       feature_toggles:
         alertingSimplifiedRouting: true
         alertingQueryAndExpressionsStepMode: true
+
+  prometheus:
+    prometheusSpec:
+      resources:
+        requests:
+          cpu: 25m
+          memory: 512Mi
+        limits:
+          cpu: 250m
+          memory: 1Gi
+      scrapeInterval: 15s
+      evaluationInterval: 15s
+
+      # Habilita scrape de targets adicionais
+      additionalScrapeConfigs: |
+        - job_name: "tns-app"
+          static_configs:
+            - targets: ["tns-app-service:8081"]
+        - job_name: "tns-db"
+          static_configs:
+            - targets: ["tns-db-service:8082"]
+
+  loki:
+    enabled: true
+
+  promtail:
+    enabled: true
