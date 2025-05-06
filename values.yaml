@@ -22,3 +22,7 @@ kube-prometheus-stack:
       auth.anonymous:
         enabled: true
         org_role: Admin
+
+      feature_toggles:
+        alertingSimplifiedRouting: true
+        alertingQueryAndExpressionsStepMode: true
