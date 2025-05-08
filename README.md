@@ -26,10 +26,6 @@ helm install app . --values values.yaml
 ```bash
 kubectl apply --filename tns-app/
 ```
-### Deploy echo-server
-```bash
-kubectl apply --filename utils/echo.yaml
-```
 
 ### Enable port-forward to grafana
 ```bash

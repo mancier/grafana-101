@@ -37,11 +37,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: tns-db-service # Service Headless
+  name: db # Service Headless
 spec:
   selector:
     app: tns-db
   ports:
     - port: 8082 # Porta do serviço
       targetPort: 80 # Porta do contêiner
-  type: ClusterIP
+  clusterIP: None # Torna este um Service Headless
