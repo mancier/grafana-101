@@ -13,7 +13,12 @@ Before we start is important to reinforce, for this project we will need some ap
 
 ### Create minikube cluster locally to deploy the application
 ```bash
-minikube start --container-runtime cri-o --cpus 4 --kubernetes-version 1.30.8 --memory 4g --profile grafana-101
+minikube start \
+    --container-runtime cri-o \
+    --cpus 4 \
+    --kubernetes-version 1.30.8 \
+    --memory 4g \
+    --profile grafana-101
 ```
 
 ### Deploy kube-stack-prometheus
