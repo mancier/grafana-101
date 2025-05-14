@@ -1,10 +1,13 @@
 kube-prometheus-stack:
   grafana:
+    assertNoLeakedSecrets: false
+    deploymentStrategy:
+      type: RollingUpdate
+
     sidecar:
       enabled: true
       defaultDatasourceEnabled: true
-      name: Prometheus
-      uid: prometheus
+
       resources:
         limits:
           memory: 200Mi
@@ -12,37 +15,35 @@ kube-prometheus-stack:
           cpu: 5m
           memory: 64Mi
 
-    alerting:
-      contactpoints.yaml:
-        secret:
-          apiVersion: 1
-          contactPoints:
-            - orgId: 1
-              name: echo-server-webhook
-              receivers:
-                - uid: echo-server-uid
-                  type: webhook
-                  settings:
-                    url: http://echo-server.echo-server.svc.cluster.local/
-                    httpMethod: POST
-                    maxAlerts: 0
-                  disableResolveMessage: false
+      alerts:
+        enabled: true
+        label: grafana_alert
+        labelValue: "1"
+        searchNamespace: ALL
 
-    additionalDataSources:
-      - name: tns-apps
-        access: proxy
-        basicAuth: false
-        type: prometheus
-        orgId: 1
-        url: http://app:80
+      dashboards:
+        enabled: true
+        label: grafana_dashboard
+        labelValue: "1"
+        searchNamespace: ALL
 
     grafana.ini:
+      users:
+        auto_assign_org: true
+        auto_assign_org_role: Admin
+
       auth.basic:
-        enabled: false
+        enabled: true
+        password_policy: false
 
       auth.anonymous:
         enabled: true
         org_role: Admin
+
+      security:
+        admin_user: admin
+        admin_password: grafana101
+
 
       feature_toggles:
         alertingSimplifiedRouting: true
@@ -62,12 +63,36 @@ kube-prometheus-stack:
 
       # Habilita scrape de targets adicionais
       additionalScrapeConfigs: |
-        - job_name: "tns-app"
-          static_configs:
-            - targets: ["tns-app-service:8081"]
-        - job_name: "tns-db"
-          static_configs:
-            - targets: ["tns-db-service:8082"]
+        # New scrape job below
+        - job_name: integrations/kubernetes/pod-metrics
+          kubernetes_sd_configs:
+            - role: pod
+          relabel_configs:
+            - action: drop
+              regex: kube-state-metrics
+              source_labels:
+                - __meta_kubernetes_pod_label_app_kubernetes_io_name
+            - action: labelmap
+              regex: __meta_kubernetes_pod_label_(.+)
+            - source_labels: [__meta_kubernetes_namespace]
+              action: replace
+              target_label: namespace
+            - source_labels: [__meta_kubernetes_pod_name]
+              action: replace
+              target_label: pod
+            - source_labels: ['__meta_kubernetes_namespace', '__meta_kubernetes_pod_label_name']
+              action: 'replace'
+              separator: '/'
+              target_label: 'job'
+              replacement: '$1'
+            - source_labels: ['__meta_kubernetes_pod_container_name']
+              action: 'replace'
+              target_label: 'container'
+        relabel_configs:
+          - action: keep
+            regex: kube-state-metrics
+            source_labels:
+              - __meta_kubernetes_pod_label_app_kubernetes_io_name
 
   loki:
     enabled: true
