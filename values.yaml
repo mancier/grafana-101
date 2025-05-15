@@ -50,6 +50,7 @@ kube-prometheus-stack:
         alertingQueryAndExpressionsStepMode: true
 
   prometheus:
+    enabled: true
     prometheusSpec:
       resources:
         requests:
@@ -60,7 +61,6 @@ kube-prometheus-stack:
           memory: 1Gi
       scrapeInterval: 15s
       evaluationInterval: 15s
-
       # Habilita scrape de targets adicionais
       additionalScrapeConfigs: |
         # New scrape job below
