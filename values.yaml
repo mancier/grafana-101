@@ -1,6 +1,10 @@
 kube-prometheus-stack:
   grafana:
     assertNoLeakedSecrets: false
+
+    adminUser: admin
+    adminPassword: grafana101
+
     deploymentStrategy:
       type: RollingUpdate
 
@@ -36,66 +40,27 @@ kube-prometheus-stack:
         enabled: true
         password_policy: false
 
-      auth.anonymous:
-        enabled: true
-        org_role: Admin
-
-      security:
-        admin_user: admin
-        admin_password: grafana101
-
-
       feature_toggles:
         alertingSimplifiedRouting: true
         alertingQueryAndExpressionsStepMode: true
+        displayAnonymousStats: true
 
   prometheus:
     enabled: true
     prometheusSpec:
-      resources:
-        requests:
-          cpu: 25m
-          memory: 512Mi
-        limits:
-          cpu: 250m
-          memory: 1Gi
       scrapeInterval: 15s
       evaluationInterval: 15s
       # Habilita scrape de targets adicionais
       additionalScrapeConfigs: |
-        # New scrape job below
-        - job_name: integrations/kubernetes/pod-metrics
-          kubernetes_sd_configs:
-            - role: pod
-          relabel_configs:
-            - action: drop
-              regex: kube-state-metrics
-              source_labels:
-                - __meta_kubernetes_pod_label_app_kubernetes_io_name
-            - action: labelmap
-              regex: __meta_kubernetes_pod_label_(.+)
-            - source_labels: [__meta_kubernetes_namespace]
-              action: replace
-              target_label: namespace
-            - source_labels: [__meta_kubernetes_pod_name]
-              action: replace
-              target_label: pod
-            - source_labels: ['__meta_kubernetes_namespace', '__meta_kubernetes_pod_label_name']
-              action: 'replace'
-              separator: '/'
-              target_label: 'job'
-              replacement: '$1'
-            - source_labels: ['__meta_kubernetes_pod_container_name']
-              action: 'replace'
-              target_label: 'container'
-        relabel_configs:
-          - action: keep
-            regex: kube-state-metrics
-            source_labels:
-              - __meta_kubernetes_pod_label_app_kubernetes_io_name
+        - job_name: "grafana"
+          static_configs:
+            - targets: ["app-grafana.default:80"]
 
   loki:
-    enabled: true
+    enabled: false
 
   promtail:
-    enabled: true
+    enabled: false
+
+  alertmanager:
+    enabled: false
