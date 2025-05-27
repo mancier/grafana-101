@@ -1,0 +1,24 @@
+Obrigado por instalar o Helm Chart {{ .Chart.Name }}! 🎉
+
+Seu deployment foi criado com sucesso.
+
+🚀 Para fazer upgrade deste chart com novos valores, utilize o comando abaixo:
+
+  helm upgrade {{ .Release.Name }} {{ .Chart.Name }} -f values.yaml
+
+Ou edite diretamente valores com a flag `--set`:
+
+  helm upgrade {{ .Release.Name }} {{ .Chart.Name }} -f values.yaml
+
+🔌 Para acessar o serviço via port-forward, execute:
+
+  kubectl port-forward svc/{{ include "<CHART_NAME>.fullname" . }} 3000:80
+
+(Altere as portas conforme necessário)
+
+📘 Para mais detalhes:
+  - Valores disponíveis: `helm show values {{ .Chart.Name }}`
+  - Histórico de releases: `helm history {{ .Release.Name }}`
+  - Reverter para uma versão anterior: `helm rollback {{ .Release.Name }} <REVISION>`
+
+Obrigado por usar {{ .Chart.Name }}! 💙
